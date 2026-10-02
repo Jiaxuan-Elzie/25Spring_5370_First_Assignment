@@ -2,6 +2,12 @@
 
 This project implements and evaluates several reinforcement learning (RL) agents for solving dynamic asset allocation problems. The codebase is structured to separate the core RL infrastructure, the agent models, and the experimental test harness.
 
+## Project Scope
+
+This repository originated as a course project. It is shared to demonstrate familiarity with policy-gradient and actor-critic implementation, controlled-environment validation, portfolio constraints, and reproducible experiment organization. It should not be interpreted as an independent research contribution or as evidence of deployable investment performance.
+
+The environments are deliberately stylized. Their purpose is to test whether an agent recovers known qualitative behavior—for example, overweighting an asset with a persistent advantage or conditioning allocations on an observable regime—before more realistic financial modeling is attempted.
+
 ## Quick Start
 
 Users can run `PolicyGradient.ipynb` cell by cell to see the results of each model independently. And it is also possible to run `asset_allocation_unittest.py` directly to see the detailed test results.
@@ -46,7 +52,7 @@ These modules provide the underlying framework needed to define and run asset al
 - **`asset_allocation/experiment_envs.py`**: This file extends the infrastructure with more complex, non-static environments used for specific tests.
 
   - `SingleAdvantageEnv`: An environment where one asset is consistently better, testing if the agent can identify and exploit it.
-  - `TwoStateRotationEnv`: An environment with a hidden market regime that switches, testing the agent's ability to adapt to changing conditions.
+  - `TwoStateRotationEnv`: An environment with an observable two-state market regime. The current regime is included in the state as a one-hot feature, allowing the experiment to test whether the agent conditions its allocation on changing market conditions.
 
 ### Models (模型)
 
@@ -74,9 +80,7 @@ These modules contain the implementations of the different RL agents (or "models
   - **Algorithm**: An extension of `method3`.
   - **Features**: This version adds a **learning rate scheduler**. The learning rate starts at an `initial_lr` and gradually decays to a `final_lr` over a set number of `lr_decay_steps`. This can help the model converge more effectively by taking large steps early in training and smaller, more precise steps later on.
 
-**Model Improvement Path:**
-
-![1774793875734](image/README/1774793875734.png)
+The model sequence progresses from REINFORCE and linear actor-critic methods to a neural actor-critic and a learning-rate-scheduled extension. The sequence is intended to compare implementation choices in a controlled setting rather than to claim a new RL algorithm.
 
 ---
 
@@ -106,3 +110,9 @@ The script is controlled by a `mode` variable, which determines which experiment
   - **Purpose**: To analyze the trade-off between performance and trading costs. It generates a plot showing how the agent's final wealth is affected by transaction constraints.
 
 By separating the core logic into the `asset_allocation` package and the experiment orchestration into this script, the project allows for clean, readable, and reproducible RL research.
+
+## Evaluation Protocol and Limitations
+
+Training uses fixed random seeds for reproducibility, and the experiment harness periodically evaluates the current policy on fixed paths. Because those evaluation paths are inspected repeatedly during development, they should be interpreted as validation paths rather than an untouched test set. The repository therefore emphasizes behavioral checks and controlled comparisons, not a formal claim of out-of-sample investment performance.
+
+The name `asset_allocation_unittest.py` is historical. The file is a scientific experiment runner rather than a conventional software unit-test suite. The environments and metrics are designed to answer whether the agent exhibits the intended qualitative response under static advantage, observable regime rotation, and turnover constraints.
